@@ -11,7 +11,7 @@
   (timbre/error "Unrecognized mutation " k))
 
 (defmethod api-read :remote-file [env dispatch-key params]
-  {:value {:file-contents (l/read-string-file)}})
+  {:value {:id 0 :file-contents (l/read-string-file)}})
 
 (defmethod api-read :default [{:keys [ast query] :as env} dispatch-key params]
   (timbre/error "Unrecognized query " (op/ast->expr ast)))
