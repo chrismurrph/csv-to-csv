@@ -1,29 +1,11 @@
 (ns app.ui
   (:require [om.dom :as dom]
             [om.next :as om :refer-macros [defui]]
-            [untangled.i18n :refer-macros [tr trf]]
-            [untangled.client.core :refer [InitialAppState initial-state]]
-            [om-css.core :as css :refer [css-merge local-class local-kw] :refer-macros [localize-classnames]]
-            [garden.core :as g]
-            [garden.units :refer [px]]
-            [garden.stylesheet :as gs]
-            yahoo.intl-messageformat-with-locales))
+            [untangled.client.core :refer [InitialAppState initial-state]]))
 
 (declare Root)
 
-(def color 'black)
-
-(defrecord MyCss []
-  css/CSS
-  (css [this] [[(local-kw MyCss :a) {:color 'blue}]]))
-
 (defui ^:once Child
-  static css/CSS
-  (css [this]
-    (let [p (local-kw Child :p)]
-      (css-merge
-        [p {:font-weight 'bold}]
-        [(gs/at-media {:min-width (px 700)} [p {:color 'red}])])))
   static InitialAppState
   (initial-state [cls params] {:id 0 :label (:label params)})
   static om/IQuery
@@ -33,18 +15,11 @@
   Object
   (render [this]
     (let [{:keys [id label]} (om/props this)]
-      ; apply-css is a macro that looks for :class in maps and convers a single (or vector of) keywords
-      ; to localized class names and rewrites it as :className. Using $ keeps it from localizing a name.
-      (css/localize-classnames Child
-        (dom/p #js {:class [:p :$r]} label)))))
+      (dom/p nil label))))
 
 (def ui-child (om/factory Child))
 
 (defui ^:once Root
-  static css/CSS
-  (css [this] (css-merge
-                MyCss
-                Child))
   static InitialAppState
   (initial-state [cls params]
     {:child (initial-state Child {:label "Constructed Label"})})
@@ -54,7 +29,5 @@
   (render [this]
     (let [{:keys [child ui/react-key]} (om/props this)]
       (dom/div #js {:key react-key}
-        ; YOU CAN EMBED THE STYLE RIGHT HERE (See also user.cljs)
-        #_(dom/style nil (g/css (css/css Root)))
         (ui-child child)))))
 

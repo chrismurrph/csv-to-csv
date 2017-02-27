@@ -5,7 +5,8 @@
     [clojure.tools.namespace.repl :refer [disable-reload! refresh clear set-refresh-dirs]]
     [com.stuartsierra.component :as component]
     [figwheel-sidecar.system :as fig]
-    [app.system :as sys]))
+    [system :as sys]
+    [app.loader :as l]))
 
 ;;FIGWHEEL
 (def figwheel (atom nil))
@@ -24,7 +25,8 @@
          preferred-config (assoc-in figwheel-config [:data :build-ids] build-ids)]
      (reset! figwheel (component/system-map
                         :figwheel-system (fig/figwheel-system preferred-config)
-                        :css-watcher (fig/css-watcher {:watch-paths ["resources/public/css"]})))
+                        ;:css-watcher (fig/css-watcher {:watch-paths ["resources/public/css"]})
+                        ))
      (println "STARTING FIGWHEEL ON BUILDS: " build-ids)
      (swap! figwheel component/start)
      (fig/cljs-repl (:figwheel-system @figwheel)))))
@@ -54,3 +56,6 @@
   []
   (stop)
   (refresh :after 'user/go))
+
+(defn get-file []
+  (l/x-1))

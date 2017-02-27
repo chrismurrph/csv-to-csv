@@ -1,4 +1,4 @@
-(ns app.system
+(ns system
   (:require
     [untangled.server.core :as core]
     [app.api :as api]

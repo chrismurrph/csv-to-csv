@@ -25,7 +25,7 @@
 
   :plugins [[lein-cljsbuild "1.1.3"]]
 
-  :source-paths ["dev/server"]
+  :source-paths ["dev/server" "src/server"]
   :test-paths ["test/client"]
   :jvm-opts ["-server" "-Xmx1024m" "-Xms512m" "-XX:-OmitStackTraceInFastThrow"]
   :clean-targets ^{:protect false} ["resources/public/js" "target"]
