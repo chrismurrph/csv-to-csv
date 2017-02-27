@@ -7,7 +7,7 @@
   :dependencies [[com.datomic/datomic-free "0.9.5206" :exclusions [joda-time]]
                  [com.taoensso/timbre "4.3.1"]
                  [commons-codec "1.10"]
-                 [org.clojure/clojure "1.8.0"]
+                 [org.clojure/clojure "1.9.0-alpha14"]
                  [org.clojure/clojurescript "1.9.229"]
                  [org.omcljs/om "1.0.0-alpha45"]
                  [binaryage/devtools "0.5.2"]

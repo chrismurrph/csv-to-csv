@@ -58,4 +58,4 @@
   (refresh :after 'user/go))
 
 (defn get-file []
-  (l/x-1))
+  (l/read-string-file))

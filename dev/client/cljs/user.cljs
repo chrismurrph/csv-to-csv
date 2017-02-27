@@ -5,7 +5,8 @@
     [cljs.pprint :refer [pprint]]
     [devtools.core :as devtools]
     [untangled.client.logging :as log]
-    [app.ui :as ui]))
+    [app.ui :as ui]
+    [app.mutations :as mut]))
 
 (enable-console-print!)
 
@@ -26,6 +27,10 @@
             (if (= 0 (count keywords))
               app-state
               (select-keys app-state keywords)))))
+
+(defn missing? []
+  (let [app-state (:reconciler @app)]
+    (mut/missing-file? app-state)))
 
 ; Om/dev logging level
 ;(log/set-level :none)
