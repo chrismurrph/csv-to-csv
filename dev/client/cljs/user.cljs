@@ -5,7 +5,7 @@
     [cljs.pprint :refer [pprint]]
     [devtools.core :as devtools]
     [untangled.client.logging :as log]
-    [app.ui :as ui]
+    [app.root :as root]
     [app.mutations :as mut]))
 
 (enable-console-print!)
@@ -16,7 +16,7 @@
            (devtools/enable-feature! :sanity-hints)
            (devtools/install!)))
 
-(reset! app (core/mount @app ui/Root "app"))
+(reset! app (core/mount @app root/Root "app"))
 
 ; use this from REPL to view bits of the application db
 (defn log-app-state
@@ -28,7 +28,7 @@
               app-state
               (select-keys app-state keywords)))))
 
-(defn missing? []
+#_(defn missing? []
   (let [app-state (:reconciler @app)]
     (mut/missing-file? app-state)))
 
