@@ -4,26 +4,24 @@
             [untangled.client.core :as uc]
             [untangled.client.routing :as r :refer [defrouter]]
             [untangled.client.impl.network :as un]
-            [untangled.client.mutations :as m :refer [defmutation]]
             [untangled.client.logging :as log]
             [untangled.ui.forms :as f]
             [untangled.ui.layout :as l]
             [untangled.ui.elements :as ele]
             [untangled.client.data-fetch :as df]
-            [cljs.reader :refer [read-string]]))
+            [cljs.reader :refer [read-string]]
+            [app.domain :as domain]))
 
 (defn field-with-label
   "A non-library helper function, written by you to help lay out your form."
-  ([comp form name label] (field-with-label comp form name label nil))
-  ([comp form name label validation-message]
-   (dom/div #js {:className (str "form-group" (if (f/invalid? form name) " has-error" ""))}
-            (dom/label #js {:className "col-sm-2" :htmlFor name} label)
+  ([comp form kw-name label-text] (field-with-label comp form kw-name label-text nil))
+  ([comp form kw-name label-text validation-message]
+   (dom/div #js {:className (str "form-group" (if (f/invalid? form kw-name) " has-error" ""))}
+            (dom/label #js {:className "col-sm-2" :htmlFor kw-name} label-text)
             ;; THE LIBRARY SUPPLIES f/form-field. Use it to render the actual field
-            (dom/div #js {:className "col-sm-10"} (f/form-field comp form name))
-            (when (and validation-message (f/invalid? form name))
-              (dom/span #js {:className (str "col-sm-offset-2 col-sm-10" name)} validation-message)))))
-
-(defn phone-ident [id] [:phone/by-id id])
+            (dom/div #js {:className "col-sm-10"} (f/form-field comp form kw-name))
+            (when (and validation-message (f/invalid? form kw-name))
+              (dom/span #js {:className (str "col-sm-offset-2 col-sm-10" kw-name)} validation-message)))))
 
 (defui ^:once PhoneForm
   static f/IForm
@@ -33,7 +31,7 @@
   static om/IQuery
   (query [this] [:db/id :phone/type :phone/number f/form-key])
   static om/Ident
-  (ident [this props] (phone-ident (:db/id props)))
+  (ident [this props] (domain/phone-ident (:db/id props)))
   Object
   (render [this]
     (let [form (om/props this)]
@@ -43,24 +41,6 @@
                (field-with-label this form :phone/number "Number:")))))
 
 (def ui-phone-form (om/factory PhoneForm))
-
-(defn- set-number-to-edit [state-map phone-id]
-  (assoc-in state-map [:screen/phone-editor :tab :number-to-edit] (phone-ident phone-id)))
-
-(defn- initialize-form [state-map form-class form-ident]
-  (update-in state-map form-ident #(f/build-form form-class %)))
-
-(defmutation edit-phone
-             "Om Mutation: Set up the given phone number to be editable in the
-             phone form, and route the UI to the form."
-             [{:keys [id]}]
-             (action [{:keys [state]}]
-                     (swap! state (fn [state-map]
-                                    (-> state-map
-                                        (initialize-form PhoneForm (phone-ident id))
-                                        (set-number-to-edit id)
-                                        (r/update-routing-links {:route-params {}
-                                                                 :handler      :route/phone-editor}))))))
 
 (defui ^:once PhoneDisplayRow
   static om/IQuery
@@ -99,7 +79,7 @@
                                                ; ROUTING HAPPENS ELSEWHERE, make sure the UI for that router updates
                                                :main-ui-router])))
           cancel-edit (fn [evt]
-                        (om/transact! this `[(f/reset-from-entity {:form-id ~(phone-ident (:db/id number-to-edit))})
+                        (om/transact! this `[(f/reset-from-entity {:form-id ~(domain/phone-ident (:db/id number-to-edit))})
                                              (r/route-to {:handler :route/phone-list})
                                              ; ROUTING HAPPENS ELSEWHERE, make sure the UI for that router updates
                                              :main-ui-router]))]
@@ -122,7 +102,6 @@
   Object
   (render [this]
     (let [{:keys [phone-numbers]} (om/props this)]
-      (println phone-numbers)
       (dom/div nil
                (dom/h1 nil "Phone Numbers (click a row to edit)")
                (l/row {} (l/col {:width 2} "Phone Type") (l/col {:width 2} "Phone Number"))

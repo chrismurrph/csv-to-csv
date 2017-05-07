@@ -1,22 +1,28 @@
 (ns app.mutations
   (:require [untangled.client.mutations :as m]
             [untangled.client.data-fetch :as df]
-            [app.ui :as ui]))
+            [app.ui :as ui]
+            [app.domain :as domain]
+            [untangled.client.routing :as r]
+            [untangled.client.mutations :as m :refer [defmutation]]
+            [untangled.ui.forms :as f]))
 
 (enable-console-print!)
 
-(defn missing-file? [state] (empty? (get-in @state [:child/by-id 0 :file-contents])))
+(defn- set-number-to-edit [state-map phone-id]
+  (assoc-in state-map [:screen/phone-editor :tab :number-to-edit] (domain/phone-ident phone-id)))
 
-(defmethod m/mutate 'app/upload-file [{:keys [state] :as env} k {:keys []}]
-  (when (missing-file? state)
-    ; remote must be the value returned by data-fetch remote-load on your parsing environment.
-    {:remote (df/remote-load env)
-     :action (fn []
-               ; Specify what you want to load as one or more calls to load-action (each call adds an item to load):
-               (println "Upload mutation")
-               #_(df/load-action state :remote-file ui/Child
-                               {:refresh [:file-contents]}
-                               )
-               ; anything else you need to do for this transaction
-               )}))
+(defn- initialize-form [state-map form-class form-ident]
+  (update-in state-map form-ident #(f/build-form form-class %)))
 
+(defmutation edit-phone
+             "Om Mutation: Set up the given phone number to be editable in the
+             phone form, and route the UI to the form."
+             [{:keys [id]}]
+             (action [{:keys [state]}]
+                     (swap! state (fn [state-map]
+                                    (-> state-map
+                                        (initialize-form ui/PhoneForm (domain/phone-ident id))
+                                        (set-number-to-edit id)
+                                        (r/update-routing-links {:route-params {}
+                                                                 :handler      :route/phone-editor}))))))
