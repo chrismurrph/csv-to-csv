@@ -5,4 +5,5 @@
 /*.iml
 /*.log
 /resources/*.csv
+/resources/public
 /target

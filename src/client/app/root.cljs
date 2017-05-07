@@ -2,6 +2,7 @@
   (:require [om.next :as om :refer [defui]]
             [om.dom :as dom]
             [om.next :as om]
+            [app.core :as core]
             [untangled.client.routing :as r]
             [untangled.client.core :as uc]
             [app.ui :as ui]))
@@ -22,3 +23,5 @@
                (let [{:keys [ui/react-key main-ui-router]} (om/props this)]
                  (dom/div #js {:key react-key}
                           (ui/ui-top-router main-ui-router)))))
+
+

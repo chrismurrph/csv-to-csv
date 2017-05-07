@@ -7,22 +7,15 @@
     [untangled.client.impl.network :as net]
     [app.ui :as ui]))
 
-#_(defonce app (atom (uc/new-untangled-client
-                     :networking (net/make-untangled-network specific-url :global-error-callback (constantly nil))
-                     :started-callback
-                     (fn [{:keys [reconciler]}]
-                       (df/load-data reconciler [{:imported-docs (om/get-query ui/ShowdownDocument)}
-                                                 {:imported-logins (om/get-query ld/LoginDialog)}]
-                                     :post-mutation 'fetch/init-state-loaded
-                                     :refresh [:app/docs :app/login-info])))))
-
 (defonce app (atom (uc/new-untangled-client
                      :started-callback (fn [{:keys [reconciler] :as app}]
-                                         (println "started, just message")
                                          (df/load app :all-numbers ui/PhoneDisplayRow {:target  [:screen/phone-list :tab :phone-numbers]
                                                                                        ;;
-                                                                                       ;; Causes problems
+                                                                                       ;; Causes a problem, but is essential.
+                                                                                       ;; Changing the source code here (*) twice gets past the problem
+                                                                                       ;; (*) 1. comment refresh
+                                                                                       ;;     2. uncomment refresh
                                                                                        ;;
-                                                                                       ;:refresh [:screen-type]
+                                                                                       :refresh [:screen-type]
                                                                                        })))))
 
