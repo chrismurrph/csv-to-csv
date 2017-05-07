@@ -17,12 +17,12 @@
                                      :refresh [:app/docs :app/login-info])))))
 
 (defonce app (atom (uc/new-untangled-client
-                     ;:networking (net/make-untangled-network specific-url :global-error-callback (constantly nil))
                      :started-callback (fn [{:keys [reconciler] :as app}]
                                          (println "started, just message")
-                                         (df/load-data reconciler [{:all-numbers (om/get-query ui/PhoneDisplayRow)}]
-                                                       :post-mutation 'app/upload-file
-                                                       :refresh [:app/docs :app/login-info])
-                                         #_(df/load app :all-numbers ui/PhoneDisplayRow {:target  [:screen/phone-list :tab :phone-numbers]
-                                                                                       :refresh [:screen-type]})))))
+                                         (df/load app :all-numbers ui/PhoneDisplayRow {:target  [:screen/phone-list :tab :phone-numbers]
+                                                                                       ;;
+                                                                                       ;; Causes problems
+                                                                                       ;;
+                                                                                       ;:refresh [:screen-type]
+                                                                                       })))))
 

@@ -1,12 +1,10 @@
 (ns app.root
   (:require [om.next :as om :refer [defui]]
             [om.dom :as dom]
-            [untangled.client.core :as uc]
+            [om.next :as om]
             [untangled.client.routing :as r]
-            [app.core :as core]
+            [untangled.client.core :as uc]
             [app.ui :as ui]))
-
-(enable-console-print!)
 
 (defui ^:once Root
        static om/IQuery
@@ -24,6 +22,3 @@
                (let [{:keys [ui/react-key main-ui-router]} (om/props this)]
                  (dom/div #js {:key react-key}
                           (ui/ui-top-router main-ui-router)))))
-
-;; In user all need for dev work
-#_(reset! core/app (uc/mount @core/app Root "app"))

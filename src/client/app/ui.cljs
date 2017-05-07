@@ -5,60 +5,12 @@
             [untangled.client.routing :as r :refer [defrouter]]
             [untangled.client.impl.network :as un]
             [untangled.client.mutations :as m :refer [defmutation]]
-    ;Lets use a real server
-    ;[app.simulated-server :refer [make-mock-network]]
             [untangled.client.logging :as log]
             [untangled.ui.forms :as f]
             [untangled.ui.layout :as l]
             [untangled.ui.elements :as ele]
             [untangled.client.data-fetch :as df]
             [cljs.reader :refer [read-string]]))
-
-#_(declare Root)
-
-#_(defui ^:once Child
-  static uc/InitialAppState
-  (initial-state [cls params] {:id 0 :file-contents (:file-contents params)})
-  static om/IQuery
-  (query [this] [:id :file-contents])
-  static om/Ident
-  (ident [this props] [:child/by-id (:id props)])
-  Object
-  (render [this]
-    (let [{:keys [id file-contents]} (om/props this)]
-      (dom/div nil
-               (dom/button #js {:onClick #(om/transact! this '[(app/upload-file)])} "Get File")
-               (dom/p nil (str "input file size: " (count file-contents)))))))
-
-#_(def ui-child (om/factory Child))
-
-#_(defui ^:once Root
-  static uc/InitialAppState
-  (initial-state [cls params]
-    {:child (initial-state Child {:file-contents ""})})
-  static om/IQuery
-  (query [this] [:ui/react-key {:child (om/get-query Child)}])
-  Object
-  (render [this]
-    (let [{:keys [child ui/react-key]} (om/props this)]
-      (dom/div #js {:key react-key}
-               (ui-child child)))))
-
-; Simulated server. You'd never write this part
-#_(defn server [env tx]
-  (server-parser (assoc env :state server-state) tx))
-
-; Networking that pretends to talk to server. You'd never write this part
-#_(defrecord MockNetwork [complete-app]
-  un/UntangledNetwork
-  (send [this edn ok err]
-    ; simulates a network delay:
-    (js/setTimeout
-      #(let [resp (server {} edn)]
-         (ok resp))
-      1000))
-  (start [this app]
-    (assoc this :complete-app app)))
 
 (defn field-with-label
   "A non-library helper function, written by you to help lay out your form."
