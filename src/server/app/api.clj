@@ -4,7 +4,7 @@
             [taoensso.timbre :as timbre]
             [app.loader :as l]
             [taoensso.timbre :as log]
-    ;; Important for tricky macro thing with `f, which expands it to fully qualified namespace
+            ;; Important for tricky macro thing with `f, which expands it to fully qualified namespace
             [untangled.ui.forms :as f]))
 
 (defn make-phone-number [id type num]
@@ -33,7 +33,6 @@
 
 ;; Server-side mutation handling. We only care about one mutation
 (defn write-handler [env k p]
-  (log/info (str "equals: " (= k `f/commit-to-entity)))
   (log/info "SERVER mutation for " k " with params " p)
   (case k
     `f/commit-to-entity (let [updates (-> p :form/updates)]

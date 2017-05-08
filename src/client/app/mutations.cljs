@@ -12,6 +12,9 @@
 (defn- set-number-to-edit [state-map phone-id]
   (assoc-in state-map [:screen/phone-editor :tab :number-to-edit] (domain/phone-ident phone-id)))
 
+;;
+;; Interesting that change state every time click, even when no theoretical need second/subsequent times
+;;
 (defn- initialize-form [state-map form-class form-ident]
   (update-in state-map form-ident #(f/build-form form-class %)))
 

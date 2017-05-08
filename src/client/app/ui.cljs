@@ -10,7 +10,8 @@
             [untangled.ui.elements :as ele]
             [untangled.client.data-fetch :as df]
             [cljs.reader :refer [read-string]]
-            [app.domain :as domain]))
+            [app.domain :as domain]
+            [app.mutations :as m]))
 
 (defn field-with-label
   "A non-library helper function, written by you to help lay out your form."
@@ -50,7 +51,7 @@
   Object
   (render [this]
     (let [{:keys [db/id phone/type phone/number]} (om/props this)]
-      (l/row {:onClick #(om/transact! this `[(edit-phone {:id ~id})
+      (l/row {:onClick #(om/transact! this `[(m/edit-phone {:id ~id})
                                              :ui/react-key])}
              (l/col {:width 2} (name type)) (l/col {:width 2} number)))))
 
@@ -106,7 +107,7 @@
                (dom/h1 nil "Phone Numbers (click a row to edit)")
                (l/row {} (l/col {:width 2} "Phone Type") (l/col {:width 2} "Phone Number"))
                ; Show a loading message while we're waiting for the network load
-               (df/lazily-loaded #(mapv ui-phone-row %) phone-numbers)))))
+               ((domain/lag df/lazily-loaded) #(mapv ui-phone-row %) phone-numbers)))))
 
 (defrouter TopLevelRouter :top-router
            ; Note the ident function works against the router children, so they must have a :screen-type data field
