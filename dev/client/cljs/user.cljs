@@ -5,7 +5,6 @@
     [cljs.pprint :refer [pprint]]
     [devtools.core :as devtools]
     [untangled.client.logging :as log]
-    [app.mutations :as mut]
     [app.root :as root]))
 
 (enable-console-print!)

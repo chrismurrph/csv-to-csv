@@ -11,7 +11,7 @@
             [untangled.client.data-fetch :as df]
             [cljs.reader :refer [read-string]]
             [app.domain :as domain]
-            [app.mutations :as m]))
+            [untangled.client.mutations :as m :refer [defmutation]]))
 
 (defn field-with-label
   "A non-library helper function, written by you to help lay out your form."
@@ -42,6 +42,28 @@
                (field-with-label this form :phone/number "Number:")))))
 
 (def ui-phone-form (om/factory PhoneForm))
+
+(defn- set-number-to-edit [state-map phone-id]
+  (assoc-in state-map [:screen/phone-editor :tab :number-to-edit] (domain/phone-ident phone-id)))
+
+;;
+;; Interesting that change state every time click, even when no theoretical need second/subsequent times
+;;
+(defn- initialize-form [state-map form-class form-ident]
+  (update-in state-map form-ident #(f/build-form form-class %)))
+
+(defmutation edit-phone
+             "Om Mutation: Set up the given phone number to be editable in the
+             phone form, and route the UI to the form."
+             [{:keys [id]}]
+             (action [{:keys [state]}]
+                     (swap! state (fn [state-map]
+                                    (-> state-map
+                                        (initialize-form PhoneForm (domain/phone-ident id))
+                                        (set-number-to-edit id)
+                                        (r/update-routing-links {:route-params {}
+                                                                 :handler      :route/phone-editor}))))))
+
 
 (defui ^:once PhoneDisplayRow
   static om/IQuery
