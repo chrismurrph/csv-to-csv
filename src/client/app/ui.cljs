@@ -11,7 +11,7 @@
             [untangled.client.data-fetch :as df]
             [cljs.reader :refer [read-string]]
             [app.domain :as domain]
-            [untangled.client.mutations :as m :refer [defmutation]]))
+            [untangled.client.mutations :refer [defmutation]]))
 
 (defn field-with-label
   "A non-library helper function, written by you to help lay out your form."
@@ -73,7 +73,7 @@
   Object
   (render [this]
     (let [{:keys [db/id phone/type phone/number]} (om/props this)]
-      (l/row {:onClick #(om/transact! this `[(m/edit-phone {:id ~id})
+      (l/row {:onClick #(om/transact! this `[(edit-phone {:id ~id})
                                              :ui/react-key])}
              (l/col {:width 2} (name type)) (l/col {:width 2} number)))))
 
@@ -82,10 +82,12 @@
 (defui ^:once PhoneEditor
   static uc/InitialAppState
   ; make sure to include the :screen-type so the router can get the ident of this component
-  (initial-state [cls params] {:screen-type :screen/phone-editor})
+  (initial-state [cls params] {:db/id domain/phone-editor-panel :screen-type :screen/phone-editor})
   static om/IQuery
   ; NOTE: the query is asking for :number-to-edit. The edit mutation will fill this in before routing here.
-  (query [this] [f/form-root-key :screen-type {:number-to-edit (om/get-query PhoneForm)}])
+  (query [this] [f/form-root-key :db/id :screen-type {:number-to-edit (om/get-query PhoneForm)}])
+  static om/Ident
+  (ident [this props] (domain/phone-editor-ident (:db/id props)))
   Object
   (render [this]
     (let [{:keys [number-to-edit]} (om/props this)
@@ -117,10 +119,13 @@
 
 (defui ^:once PhoneList
   static om/IQuery
-  (query [this] [:screen-type {:phone-numbers (om/get-query PhoneDisplayRow)}])
+  (query [this] [:db/id :screen-type {:phone-numbers (om/get-query PhoneDisplayRow)}])
+  static om/Ident
+  (ident [this props] (domain/phone-list-ident (:db/id props)))
   static uc/InitialAppState
   ; make sure to include the :screen-type so the router can get the ident of this component
-  (initial-state [this params] {:screen-type   :screen/phone-list
+  (initial-state [this params] {:db/id domain/phone-list-panel
+                                :screen-type   :screen/phone-list
                                 :phone-numbers []})
   Object
   (render [this]
