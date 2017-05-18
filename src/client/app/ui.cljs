@@ -74,7 +74,7 @@
   (render [this]
     (let [{:keys [db/id phone/type phone/number]} (om/props this)]
       (l/row {:onClick #(om/transact! this `[(edit-phone {:id ~id})
-                                             :ui/react-key])}
+                                             :main-ui-router])}
              (l/col {:width 2} (name type)) (l/col {:width 2} number)))))
 
 (def ui-phone-row (om/factory PhoneDisplayRow {:keyfn :db/id}))
@@ -134,7 +134,7 @@
                (dom/h1 nil "Phone Numbers (click a row to edit)")
                (l/row {} (l/col {:width 2} "Phone Type") (l/col {:width 2} "Phone Number"))
                ; Show a loading message while we're waiting for the network load
-               ((domain/lag df/lazily-loaded) #(mapv ui-phone-row %) phone-numbers)))))
+               (df/lazily-loaded #(mapv ui-phone-row %) phone-numbers)))))
 
 (defrouter TopLevelRouter :top-router
            ; Note the ident function works against the router children, so they must have a :screen-type data field

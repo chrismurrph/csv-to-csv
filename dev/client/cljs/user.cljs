@@ -9,12 +9,6 @@
 
 (enable-console-print!)
 
-; Use Chrome...these enable proper formatting of cljs data structures!
-(defonce tools-installed
-         (do
-           (devtools/enable-feature! :sanity-hints)
-           (devtools/install!)))
-
 (reset! app (core/mount @app root/Root "app"))
 
 ; use this from REPL to view bits of the application db
