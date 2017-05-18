@@ -9,6 +9,5 @@
 
 (defonce app (atom (uc/new-untangled-client
                      :started-callback (fn [{:keys [reconciler] :as app}]
-                                         (df/load app :all-numbers ui/PhoneDisplayRow {:target  [:screen/phone-list :tab :phone-numbers]
-                                                                                       :refresh [:main-ui-router]})))))
+                                         (df/load app :all-numbers ui/PhoneDisplayRow {:target  [:screen/phone-list :tab :phone-numbers] })))))
 
