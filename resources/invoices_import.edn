@@ -1,0 +1,39 @@
+{:import-file-name     "SalesInvoices_Seaweed Software Pty Ltd_2017-Aug-15.10.46.56.csv"
+ :test-file?           false
+ :target-headings      #{:customer.company/name :customer.company/timezone :customer.company/addr-line-1
+                         :customer.company/addr-line-2 :customer.company/addr-line-3
+                         :customer.contact/name
+                         :description :amount :currency
+                         :sent-to-email-addresses
+                         :invoice-date
+                         :due-date
+                         :total :tax-total :invoice-number :invoice-amount-paid
+                         :quantity :unit-amount :ledger-account :tax-type :sent-status :payment-status
+                         }
+ :translations         {
+                        "POAddressLine1"       :customer.company/addr-line-1
+                        "POCountry"            :customer.company/addr-line-3
+                        "InvoiceNumber"        :invoice-number
+                        "InvoiceDate"          :invoice-date
+                        "DueDate"              :due-date
+                        "Total"                :total
+                        "TaxTotal"             :tax-total
+                        "InvoiceAmountPaid"    :invoice-amount-paid
+                        "Description"          :description
+                        "Quantity"             :quantity
+                        "UnitAmount"           :unit-amount
+                        "AccountCode"          :ledger-account
+                        "TaxType"              :tax-type
+                        "Currency"             :currency
+                        "Sent"                 :sent-status
+                        "Status"               :payment-status
+                        }
+ :complex-translations [[:one->many ["ContactName"
+                                     [:customer.company/name :customer.contact/name]
+                                     [:concentrator/company :concentrator/person]]]
+                        [:change ["EmailAddress" :sent-to-email-addresses :changer/collection]]
+                        [:many->one [["POCity" "PORegion" "POPostalCode"] :customer.company/addr-line-2 :spaced]]]
+ :ignore-headings      #{"POAddressLine2" "POAddressLine3" "POAddressLine4" "Reference" "PlannedDate"
+                         "InvoiceAmountDue" "InventoryItemCode" "Discount" "LineAmount" "TaxAmount"
+                         "TrackingName1" "TrackingName2" "TrackingOption1" "TrackingOption2" "Type"}
+ }

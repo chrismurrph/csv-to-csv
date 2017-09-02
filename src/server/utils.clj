@@ -176,6 +176,11 @@
           (if (vector? new-val) new-val [new-val])
           (subvec v idx)))
 
+(defn replace-in [v idx new-val]
+  (concat (subvec v 0 idx)
+          (if (vector? new-val) new-val [new-val])
+          (subvec v (inc idx))))
+
 (defn insert-within-str-at [s x n]
   (apply str (concat (take n s) x (drop n s))))
 

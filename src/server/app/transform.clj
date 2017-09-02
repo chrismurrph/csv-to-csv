@@ -1,5 +1,6 @@
 (ns app.transform
   (:require [clojure.string :as s]
+            [app.user-provided :as user]
             [utils :as u]))
 
 (defn transpose [xss]
@@ -155,6 +156,7 @@
                                         translations
                                         ignore-headings] :as config}]
   (fn [{:keys [headings lines]}]
+    (assert (vector? lines))
     (let [translated-headings (map
                                 (merge (perfect-translations target-headings) translations)
                                 headings)
@@ -169,19 +171,28 @@
                transpose
                (remove #(nil? (first %)))
                transpose
-               (remove all-blank?)
-               ))))))
+               (remove all-blank?)))))))
 
 ;;
-;; Must take and return {:keys [headings lines]}
+;; Get what is at the idx and replicate it for each many-fns
+;;
+(defn add-fields-into-line [idx many-fns]
+  (fn [line]
+    (assert (vector? line))
+    (let [field-value (nth line idx)
+          new-field-values (mapv (fn [f] (when (f field-value) field-value)) many-fns)]
+      (vec (u/replace-in line idx new-field-values)))))
+
+;;
+;; Inner fn must take and return {:keys [headings lines]}
 ;; So this and others like it can be composed before string-lines->translated
 ;;
-(defn one->many [{:keys [test-file?
-                         target-headings
-                         translations
-                         complex-translations
-                         ignore-headings] :as config}]
-  (fn [{:keys [headings lines]}]
-    (let []
-      #_incoming-headings
-      (first lines))))
+(defn one->many [one-from-heading many-to-headings many-fn-keys]
+  (let [many-fns (mapv user/key->fn many-fn-keys)]
+    (fn [{:keys [headings lines]}]
+      ;(assert (vector? lines))
+      (let [idx (u/index-of one-from-heading headings)
+            line-changer-f (add-fields-into-line idx many-fns)
+            new-headings (u/replace-in headings idx many-to-headings)]
+        {:headings new-headings
+         :lines (map line-changer-f lines)}))))

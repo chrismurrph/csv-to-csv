@@ -31,6 +31,7 @@
 
 ;;
 ;; More complex because we don't count commas within quotes
+;; This is finally where returning a line hence mapv
 ;;
 (defn split-by-comma [init-in-quote? x]
   (let [init-state {:rest-line       x
@@ -43,8 +44,7 @@
          (append-ending x)
          (into [-1])
          (partition 2 1)
-         (map (fn [[y z]] (subs x (inc y) z)))
-         )))
+         (mapv (fn [[y z]] (subs x (inc y) z))))))
 
 ;;
 ;; Normal concatenation won't work as the line that opened the quote was not known about when did
@@ -77,6 +77,9 @@
        (partition 2 1)
        (map (partial maybe-join expected-sz))))
 
+;;
+;; Get rid of the commas
+;;
 (defn vectorize [lines-from-file]
   (let [[headings-str & lines-strs] lines-from-file
         incoming-headings (mapv s/trim (s/split headings-str #","))
@@ -84,7 +87,7 @@
                  (split-by-comma false line-str))
         lines (join-short-lines (count incoming-headings) lines')]
     {:headings incoming-headings
-     :lines lines}))
+     :lines    lines}))
 
 (defn translate [{:keys [import-file-name ignore-headings] :as config}]
   (assert (set? ignore-headings) (u/assert-str "ignore-headings" ignore-headings))
@@ -94,13 +97,32 @@
          vectorize
          f)))
 
-(defn translate-for-one->many [{:keys [import-file-name ignore-headings] :as config}]
+;;
+;; There are a lot of processor functions, each of which will take {:keys [headings lines]} and
+;; return the same. So reduce over them to alter the state many times.
+;;
+(defn process-complex-translations [processor-fns]
+  (fn [{:keys [headings lines] :as st}]
+    (reduce
+      (fn [acc f]
+        (f acc))
+      st
+      processor-fns)))
+
+(defn translate-for-one->many [{:keys [import-file-name ignore-headings complex-translations] :as config}]
   (assert (set? ignore-headings) (u/assert-str "ignore-headings" ignore-headings))
-  (let [f (transform/one->many config)]
+  (assert (pos? (count complex-translations)))
+  (let [fns (->> complex-translations
+                 (keep (fn [[name-key details]]
+                         (println name-key)
+                         (case name-key
+                           :one->many (apply transform/one->many details)
+                           nil)))
+                 process-complex-translations)]
     (->> import-file-name
          get-input-lines
          vectorize
-         f)))
+         fns)))
 
 (defn test-import []
   (let [config (-> "test_import.edn" io/resource u/read-edn)]
