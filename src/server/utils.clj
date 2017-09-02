@@ -2,6 +2,21 @@
   (:require [clojure.string :as s]
             [clojure.pprint :as pp]))
 
+(defn assert-str [name value]
+  (str name " (nil?, fn?, type, value-of): ["
+       (nil? value) ", " (fn? value)
+       (when (-> value fn? not) (str ", " (type value) ", " value)) "]"))
+
+(defn read-edn [filename]
+  (assert (clojure.string/ends-with? filename ".edn"))
+  (read-string (slurp filename)))
+
+(defn map-map-entries [f m]
+  (->> m
+       (map f)
+       (into {})))
+(def remap map-map-entries)
+
 ;;
 ;; Won't work in assert because of namespace issues, so copy into your own file until
 ;; I become better at macros (or ask on SO)
@@ -148,8 +163,21 @@
                     idx))
                 coll))
 
-(defn index-of [coll desired]
-  (first (keep-indexed (fn [idx val] (when (= val desired) idx)) coll)))
+(defn index-of [needle haystack]
+  (->> haystack
+       (keep-indexed #(when (= %2 needle) %1))
+       first))
+
+;;
+;; vectors are subsumed. So if you want a collection kept intact use a list.
+;;
+(defn insert-in [v idx new-val]
+  (concat (subvec v 0 idx)
+          (if (vector? new-val) new-val [new-val])
+          (subvec v idx)))
+
+(defn insert-within-str-at [s x n]
+  (apply str (concat (take n s) x (drop n s))))
 
 (defn first-no-more [seq]
   (assert (= nil (second seq)) (str "Only supposed to be one. However:\nFIRST:\n" (first seq) "\nSECOND:\n" (second seq)))
@@ -194,9 +222,6 @@
       (if (nil? res)
         acc
         (recur (conj acc res) (inc res))))))
-
-(defn insert-at [s x n]
-  (apply str (concat (take n s) x (drop n s))))
 
 (defn indexes-of-many-whole-words [s values after?]
   (map #(indexes-of-whole-word s %  after?) values))
@@ -346,8 +371,6 @@
                  lines)
         res (:results output)]
     res))
-
-
 
 (defn string->int-not-strict [s]
   (assert (string? s) (str "Wrong type (not string), where value is: " s ", type is " (type s)))

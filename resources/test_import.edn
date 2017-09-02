@@ -1,0 +1,9 @@
+{:import-file-name "test_import"
+ :test-file? true
+ :target-headings #{"Name", "Given Name", #_"Additional Name", "Family Name"}
+ :translations {"Informal Name" "Name",
+                "First Name"    "Given Name",
+                ;"Slurr" "Additional Name",
+                "Surname"       "Family Name"}
+ :ignore-headings #{"Slurr"}
+}
