@@ -13,5 +13,8 @@
 
 (def key->fn
   {:concentrator/company company?
-   :concentrator/person  person?})
+   :concentrator/person  person?
+   :spaced               (partial clojure.string/join ", ")
+   ;; Need to use list not vector. See assumption of replace-in
+   :changer/collection   list})
 

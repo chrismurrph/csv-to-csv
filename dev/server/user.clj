@@ -31,7 +31,7 @@
      (swap! figwheel component/start)
      (fig/cljs-repl (:figwheel-system @figwheel)))))
 
-(set-refresh-dirs "src/server" "dev/server")
+(set-refresh-dirs "src/server" "dev/server" "test/server")
 
 (defonce system (atom nil))
 
@@ -51,7 +51,7 @@
   (init)
   (start))
 
-(defn reset
+(defn restart
   "Stop the web server, refresh all namespace source code from disk, then restart the web server."
   []
   (stop)

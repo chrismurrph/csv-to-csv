@@ -12,7 +12,7 @@
                  [org.omcljs/om "1.0.0-alpha48" :scope "provided"]
                  [binaryage/devtools "0.9.4"]
                  [figwheel-sidecar "0.5.9" :exclusions [ring/ring-core joda-time org.clojure/tools.reader]]
-                 [com.cemerick/piggieback "0.2.1"]
+                 ;[com.cemerick/piggieback "0.2.1"]
                  [org.clojure/tools.nrepl "0.2.12"]
                  [org.clojure/core.async "0.3.442"]
                  [org.clojure/tools.reader "1.0.0-beta4"]
@@ -27,8 +27,8 @@
 
   :plugins [[lein-cljsbuild "1.1.5"]]
 
-  :source-paths ["dev/server" "src/server"]
-  :test-paths ["test/client"]
+  :source-paths ["dev/server" "src/server" "test/server"]
+  :test-paths ["test/client" "test/server"]
   ;:jvm-opts ["-server" "-Xmx1024m" "-Xms512m" "-XX:-OmitStackTraceInFastThrow"]
   :clean-targets ^{:protect false} ["resources/public/js" "target"]
 

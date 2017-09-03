@@ -79,6 +79,9 @@
 
 ;;
 ;; Get rid of the commas
+;; We use terminology of vectorized to mean format of a vector then a list, where
+;; the vector is of the headings and the list is of vectors, each representing a line.
+;; Format we have chosen to deal with csv files internally.
 ;;
 (defn vectorize [lines-from-file]
   (let [[headings-str & lines-strs] lines-from-file
@@ -86,43 +89,46 @@
         lines' (for [line-str lines-strs]
                  (split-by-comma false line-str))
         lines (join-short-lines (count incoming-headings) lines')]
+    ;(println (first lines))
     {:headings incoming-headings
      :lines    lines}))
-
-(defn translate [{:keys [import-file-name ignore-headings] :as config}]
-  (assert (set? ignore-headings) (u/assert-str "ignore-headings" ignore-headings))
-  (let [f (transform/string-lines->translated config)]
-    (->> import-file-name
-         get-input-lines
-         vectorize
-         f)))
 
 ;;
 ;; There are a lot of processor functions, each of which will take {:keys [headings lines]} and
 ;; return the same. So reduce over them to alter the state many times.
 ;;
-(defn process-complex-translations [processor-fns]
+(defn complex-translations-hof [processor-fns]
+  ;(println (str "Num functions going to apply is " (count processor-fns)))
   (fn [{:keys [headings lines] :as st}]
     (reduce
       (fn [acc f]
-        (f acc))
+        (let [{:keys [headings lines] :as vectorized} (f acc)]
+          (assert (= (count headings) (-> lines first count))
+                  (str "headings, first line, fn: " (count headings) ", " (-> lines first count) ", " f))
+          vectorized))
       st
       processor-fns)))
 
-(defn translate-for-one->many [{:keys [import-file-name ignore-headings complex-translations] :as config}]
+(defn collect-complex-translations [translations]
+  (->> translations
+       (keep (fn [[name-key details]]
+               ;(println name-key)
+               (case name-key
+                 :one->many (apply transform/one->many details)
+                 :many->one (apply transform/many->one details)
+                 :change (apply transform/change details)
+                 nil)))
+       complex-translations-hof))
+
+(defn translate [{:keys [import-file-name ignore-headings complex-translations] :as config}]
   (assert (set? ignore-headings) (u/assert-str "ignore-headings" ignore-headings))
-  (assert (pos? (count complex-translations)))
-  (let [fns (->> complex-translations
-                 (keep (fn [[name-key details]]
-                         (println name-key)
-                         (case name-key
-                           :one->many (apply transform/one->many details)
-                           nil)))
-                 process-complex-translations)]
+  (let [translations (collect-complex-translations complex-translations)
+        transform (transform/string-lines->translated config)]
     (->> import-file-name
          get-input-lines
          vectorize
-         fns)))
+         translations
+         transform)))
 
 (defn test-import []
   (let [config (-> "test_import.edn" io/resource u/read-edn)]
@@ -132,6 +138,6 @@
   (let [config (-> "google_import.edn" io/resource u/read-edn)]
     (translate config)))
 
-(defn xero-invoices-import []
+(defn invoices-import []
   (let [config (-> "invoices_import.edn" io/resource u/read-edn)]
-    (translate-for-one->many config)))
+    (translate config)))

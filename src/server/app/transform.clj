@@ -156,7 +156,7 @@
                                         translations
                                         ignore-headings] :as config}]
   (fn [{:keys [headings lines]}]
-    (assert (vector? lines))
+    (assert (seq? lines) (u/assert-str "lines" lines))
     (let [translated-headings (map
                                 (merge (perfect-translations target-headings) translations)
                                 headings)
@@ -166,22 +166,46 @@
       (let [problem (find-problem test-file? ignore-headings headings-from-to lines)]
         (if problem
           ["PROBLEM:" (desc-problem headings lines problem)]
-          (->> lines
-               (cons translated-headings)
-               transpose
-               (remove #(nil? (first %)))
-               transpose
-               (remove all-blank?)))))))
+          (let [headings (vec (remove nil? translated-headings))]
+            {:headings headings
+             :lines    (->> lines
+                            (cons translated-headings)
+                            transpose
+                            (remove #(nil? (first %)))
+                            transpose
+                            (remove all-blank?)
+                            (drop 1))}))))))
 
 ;;
 ;; Get what is at the idx and replicate it for each many-fns
 ;;
-(defn add-fields-into-line [idx many-fns]
+(defn add-fields-into-line [idx many-preds]
   (fn [line]
     (assert (vector? line))
     (let [field-value (nth line idx)
-          new-field-values (mapv (fn [f] (when (f field-value) field-value)) many-fns)]
+          new-field-values (mapv (fn [f] (when (f field-value) field-value)) many-preds)]
       (vec (u/replace-in line idx new-field-values)))))
+
+(defn swap-field-in-line [idx f]
+  (fn [line]
+    (assert (vector? line))
+    (let [field-value (nth line idx)
+          new-field-value (f field-value)]
+      (vec (u/replace-in line idx new-field-value)))))
+
+;;
+;; Get the values at the indexes, join them together using join-fn.
+;; Replace in at the first index and remove at all subsequent indexes.
+;;
+(defn rationalize-line [indexes join-fn]
+  (let [[idx & idxs] indexes]
+    (fn [line]
+      (assert (vector? line))
+      (let [values (map #(nth line %) indexes)
+            one-value (join-fn values)]
+        (-> line
+            (u/replace-in idx one-value)
+            (u/remove-at-indexes idxs))))))
 
 ;;
 ;; Inner fn must take and return {:keys [headings lines]}
@@ -190,9 +214,38 @@
 (defn one->many [one-from-heading many-to-headings many-fn-keys]
   (let [many-fns (mapv user/key->fn many-fn-keys)]
     (fn [{:keys [headings lines]}]
-      ;(assert (vector? lines))
       (let [idx (u/index-of one-from-heading headings)
             line-changer-f (add-fields-into-line idx many-fns)
             new-headings (u/replace-in headings idx many-to-headings)]
         {:headings new-headings
-         :lines (map line-changer-f lines)}))))
+         :lines    (map line-changer-f lines)}))))
+
+;; [["POCity" "PORegion" "POPostalCode"] :customer.company/addr-line-2 :spaced]
+(defn many->one [many-from-headings one-to-heading concat-key]
+  (let [one-fn (user/key->fn concat-key)]
+    (fn [{:keys [headings lines]}]
+      (let [idxs (map #(u/index-of % headings) many-from-headings)
+            _ (assert (every? #(or (pos? %) (zero? %)) idxs))
+            line-changer-f (rationalize-line idxs one-fn)
+            new-headings (-> headings
+                             (u/replace-in (first idxs) one-to-heading)
+                             (u/remove-at-indexes (next idxs)))]
+        {:headings new-headings
+         :lines    (map line-changer-f lines)}))))
+
+;; [:change ["EmailAddress" :sent-to-email-addresses :changer/collection]]
+(defn change [from-heading to-heading fn-key]
+  (let [f (user/key->fn fn-key)]
+    (fn [{:keys [headings lines]}]
+      (let [idx (u/index-of from-heading headings)
+            line-changer-f (swap-field-in-line idx f)
+            new-headings (vec (u/replace-in headings idx to-heading))]
+        {:headings new-headings
+         :lines    (map line-changer-f lines)}))))
+
+(defn select-heading-value [heading line-num {:keys [headings lines]}]
+  (let [idx (u/index-of heading headings)
+        line (-> lines
+                 vec
+                 (nth line-num))]
+    (nth line idx)))

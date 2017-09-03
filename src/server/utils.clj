@@ -171,15 +171,33 @@
 ;;
 ;; vectors are subsumed. So if you want a collection kept intact use a list.
 ;;
-(defn insert-in [v idx new-val]
+#_(defn insert-in [v idx new-val]
   (concat (subvec v 0 idx)
           (if (vector? new-val) new-val [new-val])
           (subvec v idx)))
 
+;;
+;; vectors are subsumed. So if you want a collection kept intact use a list.
+;;
 (defn replace-in [v idx new-val]
-  (concat (subvec v 0 idx)
-          (if (vector? new-val) new-val [new-val])
-          (subvec v (inc idx))))
+  (assert (vector? v) (assert-str "v" v))
+  (vec (concat (subvec v 0 idx)
+               (if (vector? new-val) new-val [new-val])
+               (subvec v (inc idx)))))
+
+(defn remove-at-index [v idx]
+  (assert (vector? v) (assert-str "v" v))
+  (vec (concat (subvec v 0 idx)
+               (subvec v (inc idx)))))
+
+(defn remove-at-indexes [v indexes]
+  (assert (vector? v) (assert-str "v" v))
+  (assert (coll? indexes))
+  (let [idxs (sort-by - indexes)]
+    (reduce
+      remove-at-index
+      v
+      idxs)))
 
 (defn insert-within-str-at [s x n]
   (apply str (concat (take n s) x (drop n s))))
@@ -229,7 +247,7 @@
         (recur (conj acc res) (inc res))))))
 
 (defn indexes-of-many-whole-words [s values after?]
-  (map #(indexes-of-whole-word s %  after?) values))
+  (map #(indexes-of-whole-word s % after?) values))
 
 #_(defn test-whole-word []
     (let [s prod-input
@@ -265,7 +283,7 @@
 
 (defn divide [num div]
   (let [res (/ num div)]
-        ;_ (assert (= res (int res)) (str "Got back fraction: " res))
+    ;_ (assert (= res (int res)) (str "Got back fraction: " res))
 
     (round 0 res)))
 
@@ -294,13 +312,13 @@
 
 (defn lcm [& numbers]
   (let [gcd-fn (fn [a b] (if (zero? b)
-                          a
-                          (recur b (mod a b))))
+                           a
+                           (recur b (mod a b))))
         lcm-inner (fn [num1 num2]
-                   (let [multiplied (* num1 num2)
-                         gcd (gcd-fn num1 num2)
-                         res (/ multiplied gcd)]
-                     res))
+                    (let [multiplied (* num1 num2)
+                          gcd (gcd-fn num1 num2)
+                          res (/ multiplied gcd)]
+                      res))
         [head & tail] numbers]
     (if (nil? tail)
       head
@@ -322,7 +340,7 @@
         from-proportion (/ (- from-val min-from) from-diff)
         res (* to-diff from-proportion)
         rounded-res (int (Math/ceil res))]
-        ;_ (println "FROM VAL:" from-val " | RES:" rounded-res " | " res " | F:" from-world " | T:" to-world)
+    ;_ (println "FROM VAL:" from-val " | RES:" rounded-res " | " res " | F:" from-world " | T:" to-world)
 
     rounded-res))
 
@@ -391,7 +409,7 @@
 (defn left-pad [xs pad-ele max-sz]
   (let [
         diff-count (- max-sz (count xs))]
-        ;_ (assert (or (zero? diff-count) (pos? diff-count)) (str "Max size is " max-sz ", yet already have " (count xs)))
+    ;_ (assert (or (zero? diff-count) (pos? diff-count)) (str "Max size is " max-sz ", yet already have " (count xs)))
 
     (if (> (count xs) max-sz)
       xs
@@ -472,9 +490,9 @@
 
       :default
       (let []
-            ;rest-of-combinations (combinations (rest population) (dec sz))
-            ;now-multiplied-with-first (mapv #(conj % (first population)) (combinations (rest population) (dec sz)))
-            ;really-rest (combinations (rest population) sz)
+        ;rest-of-combinations (combinations (rest population) (dec sz))
+        ;now-multiplied-with-first (mapv #(conj % (first population)) (combinations (rest population) (dec sz)))
+        ;really-rest (combinations (rest population) sz)
 
         (concat (map #(cons (first population) %) (combinations (rest population) (dec sz)))
                 (combinations (rest population) sz))))))
