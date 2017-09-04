@@ -1,8 +1,8 @@
-(ns app.test-loader
+(ns test-loader
   (:require [clojure.test :refer :all]
-            [utils :as u]
-            [app.loader :as l]
-            [app.transform :as t]
+            [csv-to-csv.utils :as u]
+            [csv-to-csv.loader :as l]
+            [csv-to-csv.transform :as t]
             [clojure.java.io :as io]
             [clojure.test :refer :all]))
 
@@ -33,6 +33,10 @@
     (is (= (->> translated
                 (t/select-heading-value :sent-to-email-addresses 0))
            '("cmts@cmts.com.au")))))
+
+(defn test-import []
+  (let [config (-> "test_import.edn" io/resource u/read-edn)]
+    (l/translate config)))
 
 (defn distinct-heading-values [heading]
   (let [config (-> "invoices_import.edn" io/resource u/read-edn)

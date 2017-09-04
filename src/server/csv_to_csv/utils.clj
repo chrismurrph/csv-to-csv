@@ -1,4 +1,4 @@
-(ns utils
+(ns csv-to-csv.utils
   (:require [clojure.string :as s]
             [clojure.pprint :as pp]))
 

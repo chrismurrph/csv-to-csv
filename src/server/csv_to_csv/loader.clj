@@ -1,8 +1,8 @@
-(ns app.loader
+(ns csv-to-csv.loader
   (:require [clojure.java.io :as io]
             [clojure.string :as s]
-            [app.transform :as transform]
-            [utils :as u]))
+            [csv-to-csv.transform :as transform]
+            [csv-to-csv.utils :as u]))
 
 (defn get-file-as-string [file-name]
   (slurp (io/resource file-name)))
@@ -129,10 +129,6 @@
          vectorize
          translations
          transform)))
-
-(defn test-import []
-  (let [config (-> "test_import.edn" io/resource u/read-edn)]
-    (translate config)))
 
 (defn google-import []
   (let [config (-> "google_import.edn" io/resource u/read-edn)]

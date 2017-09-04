@@ -1,8 +1,8 @@
-(ns app.test-transform
+(ns test-transform
   (:require
     [clojure.test :refer :all]
-    [app.transform :as t]
-    [utils :as u]))
+    [csv-to-csv.transform :as t]
+    [csv-to-csv.utils :as u]))
 
 (deftest many-joined-into-first
   (is (= ["a, b, d" "c" "e"]

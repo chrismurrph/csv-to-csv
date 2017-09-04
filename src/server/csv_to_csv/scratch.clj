@@ -1,6 +1,7 @@
-(ns app.scratch
-  (:require [utils :as u])
-  (:import (clojure.lang Cons)))
+(ns csv-to-csv.scratch
+  (:require [csv-to-csv.utils :as u])
+  ;(:import (clojure.lang Cons))
+  )
 
 (defn compose-1 [& fns]
   (fn [a & opts]

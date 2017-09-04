@@ -1,7 +1,7 @@
-(ns app.test-user-provided
+(ns test-user-provided
     (:require
       [clojure.test :refer :all]
-      [app.user-provided :as u]))
+      [csv-to-csv.user-provided :as u]))
 
 (deftest just-a-person
   (is (= (u/person? "Seaweed Person")

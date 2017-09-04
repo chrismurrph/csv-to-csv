@@ -1,4 +1,4 @@
-(ns app.user-provided
+(ns csv-to-csv.user-provided
   (:require [clojure.string :as s]))
 
 (defn proper-noun-like? [word]

@@ -1,7 +1,7 @@
-(ns app.transform
+(ns csv-to-csv.transform
   (:require [clojure.string :as s]
-            [app.user-provided :as user]
-            [utils :as u]))
+            [csv-to-csv.user-provided :as user]
+            [csv-to-csv.utils :as u]))
 
 (defn transpose [xss]
   (assert (= (count (first xss)) (count (second xss)) (count (#(nth % 2) xss))))
@@ -100,7 +100,7 @@
         _ (println (str "all-from-headings: " all-from-headings))
         _ (println (str "ignore-headings: " ignore-headings))
         from-headings (remove ignore-headings all-from-headings)
-        accepted-positions (utils/positions (set from-headings) all-from-headings)
+        accepted-positions (u/positions (set from-headings) all-from-headings)
         _ (println "accepted positions: " accepted-positions)
         [from-to-sz ignore-sz from-sz] (map count [headings-from-to ignore-headings from-headings])
         ]
