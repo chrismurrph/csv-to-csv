@@ -7,7 +7,9 @@
 
 (defn person? [txt]
   (let [names (s/split txt #" ")]
-    (every? proper-noun-like? names)))
+    (and
+      (not (some #(= % "Ltd") names))
+      (every? proper-noun-like? names))))
 
 (def company? (complement person?))
 

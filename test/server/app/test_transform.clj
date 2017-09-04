@@ -24,4 +24,33 @@
 (deftest three-together
   (let [many->one (apply t/many->one [["POCity" "PORegion" "POPostalCode"] :customer.company/addr-line-2 :spaced])]
     (is (= "North Wollongong, NSW, 2500"
-           (t/select-heading-value :customer.company/addr-line-2 0 (many->one vectorized-by-one->many))))))
+           (->> vectorized-by-one->many
+                many->one
+                (t/select-heading-value :customer.company/addr-line-2 0))))))
+
+(def vectorized-result
+  {:headings [:customer.company/name
+              :customer.contact/name
+              :sent-to-email-addresses
+              :customer.company/addr-line-1
+              :customer.company/addr-line-2
+              :customer.company/addr-line-3
+              :invoice-number :invoice-date :due-date :total :tax-total :invoice-amount-paid :description
+              :quantity :unit-amount
+              :ledger-account
+              :tax-type
+              :currency
+              :sent-status
+              :payment-status],
+   :lines    '(["CMTS NSW" nil ("cmts@cmts.com.au") "1/30 Ralph Black Drive" "North Wollongong, NSW, 2500"
+                "Australia" "INV-4188" "1/08/2017" "6/08/2017" "1749.0000" "0.0000" "0.0000" "BHP Mine Support"
+                "1.0000" "1749.0000" "200" "BAS Excluded" "AUD" "Sent" "Awaiting Payment"])})
+
+(deftest as-map-works
+  (let [{:keys [headings lines]} vectorized-result
+        mapper (t/as-map headings)
+        m (first (map mapper lines))]
+    (is (= (:description m)
+           "BHP Mine Support"))
+    (is (= (:invoice-number m)
+           "INV-4188"))))

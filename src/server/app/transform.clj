@@ -249,3 +249,22 @@
                  vec
                  (nth line-num))]
     (nth line idx)))
+
+(defn distinct-heading-values [heading {:keys [headings lines]}]
+  (assert (coll? headings) (u/assert-str "headings" headings))
+  (let [idx (u/index-of heading headings)]
+    (assert idx (str heading " can't be found in " headings))
+    (->> lines
+         (keep #(nth % idx))
+         distinct)))
+
+(defn first-line [heading {:keys [headings lines]} value]
+  (let [idx (u/index-of heading headings)]
+    (->> lines
+         (filter #(= value (nth % idx)))
+         first)))
+
+(defn as-map [headings]
+  "Allows to conveniently look at the results as maps"
+  (fn [line]
+    (zipmap headings line)))

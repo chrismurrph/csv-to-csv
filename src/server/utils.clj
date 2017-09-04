@@ -81,12 +81,21 @@
 ;; pr-str might be proper way
 ;; (defn pp-str [x] (-> x clojure.pprint/pprint with-out-str))
 
+(def width 120)
+
 (defn pp-str
-  ([x n]
+  ([n x]
    (binding [pp/*print-right-margin* n]
      (-> x clojure.pprint/pprint with-out-str)))
   ([x]
-   (pp-str x 1000)))
+   (pp-str width x)))
+
+(defn pp
+  ([n x]
+   (binding [pp/*print-right-margin* n]
+     (-> x clojure.pprint/pprint)))
+  ([x]
+   (pp width x)))
 
 ;(def pp-str (fn [s]
 ;              (pr-str s {:right-margin 200
